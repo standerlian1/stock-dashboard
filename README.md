@@ -16,3 +16,43 @@
 - **Exact Timestamps**: "Last updated: 2025-01-15 14:23:17 EST"
 
 ## 📱 **Demo**
+┌─────────────────────┬─────────────────────────────────────┐
+│ TSM ✗ AAPL ✓ NVDA   │ [Interactive Candlestick Chart]     │
+│ GSPC                │ Last updated: 2025-01-15 15:30 EST  │
+└─────────────────────┴─────────────────────────────────────┘
+
+
+ Copy code
+
+
+## 🚀 **Live Demo**
+**[Your Streamlit URL will appear here after deployment]**
+
+## 🛠️ **Quick Setup (5 minutes)**
+
+1. **Supabase**: [supabase.com](https://supabase.com) → New Project → Copy URL + anon key
+2. **Deploy**: Connect GitHub repo to [share.streamlit.io](https://share.streamlit.io)
+3. **Secrets**: Add `SUPABASE_URL` + `SUPABASE_ANON_KEY` to Streamlit settings
+
+## 📊 **Tech Stack**
+Frontend: Streamlit + Plotly
+Backend: yfinance + APScheduler
+Database: Supabase PostgreSQL
+Deployment: Streamlit Cloud
+
+
+ Copy code
+
+
+## 🔧 **Local Development**
+ash
+pip install -r requirements.txt
+cp secrets.toml.example .streamlit/secrets.toml
+streamlit run pages/1_📊_Dashboard.py
+
+
+ Copy code
+
+
+---
+**Built with ❤️ for real-time stock analysis**
