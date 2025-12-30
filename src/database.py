@@ -16,30 +16,6 @@ class SupabaseStockDB:
         
         self.client: Client = create_client(url, key)
     
-    def create_table(self):
-        """Create stocks_data table with indexes"""
-        table_schema = """
-        CREATE TABLE IF NOT EXISTS stocks_data (
-            id BIGSERIAL PRIMARY KEY,
-            symbol VARCHAR(10) NOT NULL,
-            date DATE NOT NULL,
-            time TIME NOT NULL,
-            fetch_timestamp TIMESTAMPTZ NOT NULL,
-            open DECIMAL(12,4) NOT NULL,
-            high DECIMAL(12,4) NOT NULL,
-            low DECIMAL(12,4) NOT NULL,
-            close DECIMAL(12,4) NOT NULL,
-            volume BIGINT,
-            created_at TIMESTAMPTZ DEFAULT NOW()
-        );
-        
-        CREATE INDEX IF NOT EXISTS idx_symbol_date ON stocks_data(symbol, date);
-        CREATE INDEX IF NOT EXISTS idx_symbol_fetch ON stocks_data(symbol, fetch_timestamp DESC);
-        """
-        
-        # Use PostgreSQL extension for raw SQL
-        self.client.rpc('execute_sql', {'query': table_schema}).execute()
-    
     def insert_data(self, df: pd.DataFrame):
         """Insert pandas DataFrame to Supabase"""
         if df.empty:
@@ -51,7 +27,7 @@ class SupabaseStockDB:
             if col not in df.columns:
                 raise ValueError(f"Missing required column: {col}")
         
-        data = df[required_cols + ['volume']].to_dict('records')
+        data = df[required_cols + ['volume']].fillna(0).to_dict('records')
         response = self.client.table('stocks_data').insert(data).execute()
         return response
     
@@ -63,16 +39,19 @@ class SupabaseStockDB:
             .select("*")\
             .eq('symbol', symbol)\
             .gte('fetch_timestamp', three_months_ago.isoformat())\
-            .order('fetch_timestamp', desc=True)\
-            .limit(days * 30)  # ~30 candles/day max
+            .order('fetch_timestamp')\
+            .limit(days * 30)
         
         data = response.data
         if not data:
             return pd.DataFrame()
         
         df = pd.DataFrame(data)
-        df['fetch_timestamp'] = pd.to_datetime(df['fetch_timestamp'])
-        return df
+        # Convert timestamp columns to datetime
+        for col in ['fetch_timestamp', 'created_at']:
+            if col in df.columns:
+                df[col] = pd.to_datetime(df[col])
+        return df.sort_values('fetch_timestamp')
     
     def get_last_update(self, symbol: str) -> str:
         """Get exact last update timestamp in NY time"""
@@ -97,3 +76,4 @@ class SupabaseStockDB:
             .delete()\
             .lt('fetch_timestamp', cutoff_date)\
             .execute()
+
