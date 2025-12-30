@@ -1,0 +1,15 @@
+stock-dashboard/
+├── .gitignore
+├── .streamlit/
+│   └── config.toml
+├── pages/
+│   ├── 1_📊_Dashboard.py
+│   └── 2_🔄_Data_Updater.py
+├── src/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── database.py
+│   ├── data_fetcher.py
+│   └── chart_builder.py
+├── requirements.txt
+├── README.md
